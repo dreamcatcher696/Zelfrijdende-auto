@@ -24,6 +24,8 @@
 #define TRIGGER_R	PB0
 #define AFSTAND		20
 volatile uint8_t	stop_F = 0;			//als stop == 0 dan geen object gedetecteerd
+volatile uint8_t	stop_L = 0;
+volatile uint8_t	stop_R = 0;
 volatile uint8_t	poll_richting = 0;	//0=vooruit 1=links 2 = rechts
 
 
@@ -60,6 +62,7 @@ int main(void)
 	
     while(1)
     {
+		poll_richting=0;
 		//trigger signaal sturen
 		PORTD &= ~(1<<TRIGGER_F);
 		PORTD |= (1<<TRIGGER_F);
@@ -117,6 +120,37 @@ int main(void)
 			PORTD &=~(1<<UITGANGR);
 				
 		}
+		if(stop_F==1)
+		{
+			//trigger signaal LEFT sturen
+			poll_richting = 1;
+			PORTD &= ~(1<<TRIGGER_L);
+			PORTD |= (1<<TRIGGER_L);
+			_delay_us(10);
+			PORTD &= ~(1<<TRIGGER_L);
+			//eind trigger LEFT signaal	
+			//trigger signaal RIGHT sturen
+			poll_richting = 1;
+			PORTB &= ~(1<<TRIGGER_R);
+			PORTB |= (1<<TRIGGER_R);
+			_delay_us(10);
+			PORTB &= ~(1<<TRIGGER_R);
+			//eind trigger RIGHT signaal
+			
+			if(PINC & (1<<INGANGL) && (stop_L==0))
+			{
+				PORTD |=(1<<UITGANGL);
+			}
+			else if(PINC & (1<<INGANGR) && (stop_R ==0))
+			{
+				PORTD |=(1<<UITGANGR);
+			}
+			else
+			{
+				PORTD |=(1<<UITGANGL);
+				PORTD |=(1<<UITGANGR);
+			}
+		}
     }
 }
 ISR(INT0_vect)
@@ -135,11 +169,35 @@ ISR(INT0_vect)
 		timerwaarde = TCNT1 / 58;
 		if(timerwaarde <= 20)
 		{
-			stop_F = 1;
+			if(poll_richting==0)
+			{
+				stop_F = 1;
+			}
+			else if(poll_richting==1)
+			{
+				stop_L = 1;
+			}
+			else if(poll_richting==2)
+			{
+				stop_R = 1;
+			}
+			
 		}
 		else
 		{
-			stop_F = 0;
+			if(poll_richting==0)
+			{
+				stop_F = 0;
+			}
+			else if(poll_richting==1)
+			{
+				stop_L = 0;
+			}
+			else if(poll_richting==2)
+			{
+				stop_R = 0;;
+			}
+			
 		}
 	}
 }
