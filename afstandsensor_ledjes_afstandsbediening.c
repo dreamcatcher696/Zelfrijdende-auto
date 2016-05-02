@@ -122,33 +122,36 @@ int main(void)
 		}
 		if(stop_F==1)
 		{
+			_delay_ms(6);
 			//trigger signaal LEFT sturen
 			poll_richting = 1;
 			PORTD &= ~(1<<TRIGGER_L);
 			PORTD |= (1<<TRIGGER_L);
 			_delay_us(10);
 			PORTD &= ~(1<<TRIGGER_L);
+			_delay_ms(6);
 			//eind trigger LEFT signaal	
 			//trigger signaal RIGHT sturen
-			poll_richting = 1;
-			PORTB &= ~(1<<TRIGGER_R);
+			poll_richting = 2;
+			/*PORTB &= ~(1<<TRIGGER_R);
 			PORTB |= (1<<TRIGGER_R);
 			_delay_us(10);
 			PORTB &= ~(1<<TRIGGER_R);
-			//eind trigger RIGHT signaal
+			_delay_ms(40);
+			//eind trigger RIGHT signaal*/
 			
-			if(PINC & (1<<INGANGL) && (stop_L==0))
+			if(PINC & (1<<INGANGL) && (stop_L==1))
 			{
 				PORTD |=(1<<UITGANGL);
 			}
-			else if(PINC & (1<<INGANGR) && (stop_R ==0))
-			{
-				PORTD |=(1<<UITGANGR);
-			}
+			//else if(PINC & (1<<INGANGR) && (stop_R ==0))
+			//{
+			//	PORTD |=(1<<UITGANGR);
+			//}
 			else
 			{
-				PORTD |=(1<<UITGANGL);
-				PORTD |=(1<<UITGANGR);
+				PORTD &=~(1<<UITGANGL);
+				PORTD &=~(1<<UITGANGR);
 			}
 		}
     }
