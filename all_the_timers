@@ -70,9 +70,9 @@ int main(void)
 	PCMSK1 |=(1<<PCINT13);				//enablen van pin change interrupt 13
 	
 	
-	TCNT0 = 0					//timer register op 0 zetten
-								//TCCR0B voor prescaler settings(CS02 op 1 voor 256 prescaler=>max range = 1.4m)
-								//TCCR2B ook op 256 prescaler => timer puls om de (8000000/256)==>1/31250==> om de 32 microseconden==> 32*255 = max lengte van object ==>/58==>1.4m
+	TCNT0 = 0;					//timer register op 0 zetten
+	TCNT1 = 0;							//TCCR0B voor prescaler settings(CS02 op 1 voor 256 prescaler=>max range = 1.4m)
+	TCNT2 = 0;							//TCCR2B ook op 256 prescaler => timer puls om de (8000000/256)==>1/31250==> om de 32 microseconden==> 32*255 = max lengte van object ==>/58==>1.4m
 								//TCCR2B CS22=> 1 CS21 => 1 CS20==> 0
 	
 	
