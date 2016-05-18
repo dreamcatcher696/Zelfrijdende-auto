@@ -72,7 +72,7 @@ int main(void)
 								//TCCR2B CS22=> 1 CS21 => 1 CS20==> 0
 	OCR1A = 38000;
 	TCCR1B |= (1<<WGM12);		//WGM12= ctc mode , compraen met ocr1A ...CS11 is 8 bit prescaler => counter om de 1us
-	TCNT1 = 0;					//timer register op 0 zetten
+//	TCNT1 = 0;					//timer register op 0 zetten
     while(1)
     {
 		//trigger signaal sturen
