@@ -39,8 +39,8 @@ void timer0Stop();
 void timer2Start();
 void timer2Stop();
 
-void vooruit();
-void achteruit(uint8_t);
+void vooruit(uint8_t);
+void achteruit(uint8_t, uint8_t);
 void links();
 void rechts();
 void centreer();
@@ -122,10 +122,11 @@ void autonoom()
 			//vooruit rijden
 			richting = 0;
 			centreer();
-			vooruit();
+			vooruit(1);
 		}
 		else
 		{
+			achteruit(1, 1);					//remmen, functie 1
 			//trigger signaal LEFT sturen
 			PORTD &= ~(1<<TRIGGER_L);
 			PORTD |= (1<<TRIGGER_L);
@@ -165,18 +166,19 @@ void autonoom()
 				if(richting == 1)		//links
 				{
 					links();
-					vooruit();
+					vooruit(1);
 				}
 				if(richting == 2)		//rechts
 				{
 					rechts();
-					vooruit();
+					vooruit(1);
 				}
 				if(richting == 3)		//achteruit
 				{
 					centreer();
-					achteruit(0);
+					achteruit(0, 1);	//achteruit 1ste functie
 				}
+				richting = 0;
 			}
 		}
 	}
@@ -203,7 +205,7 @@ void manueel()
 		//eind trigger signaal
 		if((PINC & (1<<INGANGV)) && (stop_F==0))
 		{
-			vooruit();
+			vooruit(2);
 			
 			stoppen = 0;
 			if(PINC & (1<<INGANGL))
@@ -221,7 +223,7 @@ void manueel()
 		}
 		else if(PINC & (1<<INGANGA))
 		{
-			achteruit(0);
+			achteruit(0, 2);				//achteruit, 2de functie
 			if(PINC & (1<<INGANGL))
 			{
 				links();
@@ -252,14 +254,14 @@ void manueel()
 			if(stoppen == 0)
 			{
 				if(stopdebounce < 2)
-				{ 
+				{
 					stopdebounce++;
 				}
 				else
 				{
 					stoppen = 1;
 					centreer();
-					achteruit(1);
+					achteruit(1, 2);		//remmen, 2de functie
 					stopdebounce = 0;
 				}
 			}
@@ -267,6 +269,7 @@ void manueel()
 		else stopdebounce = 0;
 	}
 	stoppen = 0;
+	stop_F = 0;
 }
 
 // ###################### INTERRUPTS ######################
@@ -389,28 +392,29 @@ void timer2Stop()
 
 // ###################### MOTORSTURING ######################
 
-void vooruit()
+void vooruit(uint8_t modus)
 {
 	PORTB |=(1<<UITGANGV);					//gas geven
-	_delay_ms(20);							//niet te snel rijden (auto niet kapot rijden tijdens tests!)
+	if(modus == 1) _delay_ms(10);							//niet te snel rijden (auto niet kapot rijden tijdens tests!)
+	else _delay_ms(20);
 	PORTB &=~(1<<UITGANGV);
 	
 }
-void achteruit(uint8_t remmen)
+void achteruit(uint8_t remmen, uint8_t modus)		//remmen, modus
 {
 	if (remmen == 1)
 	{
 		PORTB |=(1<<UITGANGA);					//achteruit rijden
-		_delay_ms(250);
+		if(modus == 1) _delay_ms(100);
+		else _delay_ms(250);
 		PORTB &=~(1<<UITGANGA);
-		
 	}
 	else
 	{
-		PORTB |=(1<<UITGANGA);					//achteruit rijden
-		_delay_ms(20);
-		PORTB &=~(1<<UITGANGA);
-		
+		PORTB |=(1<<UITGANGA);
+		if(modus == 2) _delay_ms(10);			//achteruit rijden
+		else _delay_ms(20);
+		PORTB &=~(1<<UITGANGA);	
 	}
 }
 void links()
