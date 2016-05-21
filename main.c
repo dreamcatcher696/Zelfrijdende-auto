@@ -28,6 +28,7 @@ volatile uint8_t	afstand_L = 0;
 volatile uint8_t	afstand_R = 0;
 volatile uint8_t	richting = 0;		//0 - vooruit	1 - links	2 - rechts	3 - achteruit
 volatile uint8_t	stoppen = 0;
+volatile uint8_t	stopdebounce = 0;
 //		Functie declaraties		//
 void autonoom();
 void manueel();
@@ -247,11 +248,17 @@ void manueel()
 		{
 			if(stoppen == 0)
 			{
-				stoppen = 1;
-				centreer();
-				achteruit(1);
+				if(stopdebounce < 2) stopdebounce++;
+				else
+				{
+					stoppen = 1;
+					centreer();
+					achteruit(1);
+					stopdebounce = 0;
+				}
 			}
 		}
+		else stopdebounce = 0;
 	}
 	stoppen = 0;
 }
