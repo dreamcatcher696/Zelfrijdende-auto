@@ -107,6 +107,7 @@ int main(void)
 
 void autonoom()
 {
+	volatile uint8_t stoppen_auto = 0;
 	while(PIND & (1<<MODE_SEL1))
 	{
 		//trigger signaal sturen
@@ -121,12 +122,17 @@ void autonoom()
 		{
 			//vooruit rijden
 			richting = 0;
+			stoppen_auto = 0;
 			centreer();
 			vooruit(1);
 		}
 		else
 		{
-			achteruit(1, 1);					//remmen, functie 1
+			if(stoppen_auto == 0)
+			{
+				achteruit(1, 1);					//remmen, functie 1
+				stoppen_auto = 1;
+			}
 			//trigger signaal LEFT sturen
 			PORTD &= ~(1<<TRIGGER_L);
 			PORTD |= (1<<TRIGGER_L);
@@ -314,7 +320,7 @@ ISR(PCINT1_vect)
 		//timerwaarde1 = TCNT0 / 1856;		//1 timer waarde om de 32 us. dus delen door 32 om 1 us te hebben, dan delen door 58 om naar cm te gaan
 		timerwaarde0 = TCNT0 ;
 		afstand_R = timerwaarde0;
-		if(timerwaarde0 <= 40)
+		if(timerwaarde0 <= 20)
 		{
 			stop_R = 1;
 		}
@@ -339,7 +345,7 @@ ISR(PCINT2_vect)
 		status2 = 1;
 		timerwaarde2 = TCNT2;
 		afstand_L = timerwaarde2;
-		if(timerwaarde2 <= 40)
+		if(timerwaarde2 <= 20)
 		{
 			stop_L = 1;
 		}
