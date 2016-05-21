@@ -418,7 +418,7 @@ void achteruit(uint8_t remmen, uint8_t modus)		//remmen, modus
 	else
 	{
 		PORTB |=(1<<UITGANGA);
-		if(modus == 2) _delay_ms(10);			//achteruit rijden
+		if(modus == 1) _delay_ms(10);			//achteruit rijden
 		else _delay_ms(20);
 		PORTB &=~(1<<UITGANGA);	
 	}
