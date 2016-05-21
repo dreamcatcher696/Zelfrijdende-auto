@@ -114,8 +114,9 @@ void autonoom()
 		PORTD |= (1<<TRIGGER_F);
 		_delay_us(10);
 		PORTD &= ~(1<<TRIGGER_F);
+		_delay_ms(30);
 		//eind trigger signaal
-			
+		
 		if(stop_F == 0)
 		{
 			//vooruit rijden
@@ -131,22 +132,22 @@ void autonoom()
 			_delay_us(10);
 			PORTD &= ~(1<<TRIGGER_L);
 			//eind trigger signaal LEFT
-				
+			
 			//trigger signaal RIGHT sturen
 			PORTB &= ~(1<<TRIGGER_R);
 			PORTB |= (1<<TRIGGER_R);
 			_delay_us(10);
 			PORTB &= ~(1<<TRIGGER_R);
 			//eind trigger RIGHT signaal
-				
+			
 			_delay_ms(30);							//wachten op echo signalen
-				
+			
 			if(richting == 0)
 			{
 				if((afstand_R >= afstand_L) && (stop_R == 0))
 				{
 					//rechts rijden
-					richting = 2;						
+					richting = 2;
 				}
 				else if(stop_L == 0)
 				{
@@ -198,10 +199,12 @@ void manueel()
 		PORTD |= (1<<TRIGGER_F);
 		_delay_us(10);
 		PORTD &= ~(1<<TRIGGER_F);
+		_delay_ms(30);
 		//eind trigger signaal
 		if((PINC & (1<<INGANGV)) && (stop_F==0))
 		{
 			vooruit();
+			
 			stoppen = 0;
 			if(PINC & (1<<INGANGL))
 			{
@@ -248,7 +251,10 @@ void manueel()
 		{
 			if(stoppen == 0)
 			{
-				if(stopdebounce < 2) stopdebounce++;
+				if(stopdebounce < 2)
+				{ 
+					stopdebounce++;
+				}
 				else
 				{
 					stoppen = 1;
@@ -279,7 +285,7 @@ ISR(INT0_vect)
 		timer1Stop();
 		status1 = 1;
 		timerwaarde1 = TCNT1 / 58;
-		if(timerwaarde1 <= 30)
+		if(timerwaarde1 <= 50)
 		{
 			stop_F = 1;
 		}
@@ -386,25 +392,25 @@ void timer2Stop()
 void vooruit()
 {
 	PORTB |=(1<<UITGANGV);					//gas geven
-	_delay_ms(10);							//niet te snel rijden (auto niet kapot rijden tijdens tests!)
+	_delay_ms(20);							//niet te snel rijden (auto niet kapot rijden tijdens tests!)
 	PORTB &=~(1<<UITGANGV);
-	_delay_ms(10);
+	
 }
 void achteruit(uint8_t remmen)
 {
 	if (remmen == 1)
 	{
 		PORTB |=(1<<UITGANGA);					//achteruit rijden
-		_delay_ms(100);
+		_delay_ms(250);
 		PORTB &=~(1<<UITGANGA);
-		_delay_ms(100);
+		
 	}
 	else
 	{
 		PORTB |=(1<<UITGANGA);					//achteruit rijden
-		_delay_ms(10);
+		_delay_ms(20);
 		PORTB &=~(1<<UITGANGA);
-		_delay_ms(10);
+		
 	}
 }
 void links()
