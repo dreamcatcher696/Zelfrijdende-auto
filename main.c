@@ -182,7 +182,10 @@ void autonoom()
 				if(richting == 3)		//achteruit
 				{
 					centreer();
-					achteruit(0, 1);	//achteruit 1ste functie
+					for(int i = 0; i < 10; i++)
+					{
+						achteruit(0, 1);	//achteruit 1ste functie
+					}
 				}
 				richting = 0;
 			}
