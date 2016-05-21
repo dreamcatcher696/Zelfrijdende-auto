@@ -231,7 +231,7 @@ void manueel()
 				centreer();
 			}
 		}
-		if(PINC & (1<<INGANGL))
+		else if(PINC & (1<<INGANGL))
 		{
 			links();
 		}
@@ -242,7 +242,7 @@ void manueel()
 		else
 		{
 			centreer();
-		}
+		}/*
 		if(stop_F==1)
 		{
 			if(stoppen == 0)
@@ -251,7 +251,7 @@ void manueel()
 				centreer();
 				achteruit(1);
 			}
-		}
+		}*/
 	}
 	stoppen = 0;
 	stop_F = 0;
