@@ -117,6 +117,19 @@ void autonoom()
 		PORTD &= ~(1<<TRIGGER_F);
 		_delay_ms(60);
 		//eind trigger signaal
+		//trigger signaal LEFT sturen
+		PORTD &= ~(1<<TRIGGER_L);
+		PORTD |= (1<<TRIGGER_L);
+		_delay_us(10);
+		PORTD &= ~(1<<TRIGGER_L);
+		//eind trigger signaal LEFT
+		_delay_ms(60);
+		//trigger signaal RIGHT sturen
+		PORTB &= ~(1<<TRIGGER_R);
+		PORTB |= (1<<TRIGGER_R);
+		_delay_us(10);
+		PORTB &= ~(1<<TRIGGER_R);
+		//eind trigger RIGHT signaal
 		
 		if(stop_F == 0)
 		{
@@ -126,12 +139,24 @@ void autonoom()
 			centreer();
 			vooruit(1);
 		}
+		else if(stop_L==1)
+		{
+			rechts();
+			vooruit(1);
+		}
+		else if(stop_R==1)
+		{
+			links();
+			vooruit(1);
+			
+		}
 		else
 		{
 			if(stoppen_auto == 0)
 			{
 				
 				achteruit(1, 1);					//remmen, functie 1
+				
 				stoppen_auto = 1;
 			}
 			//trigger signaal LEFT sturen
@@ -140,7 +165,7 @@ void autonoom()
 			_delay_us(10);
 			PORTD &= ~(1<<TRIGGER_L);
 			//eind trigger signaal LEFT
-			
+			_delay_ms(60);
 			//trigger signaal RIGHT sturen
 			PORTB &= ~(1<<TRIGGER_R);
 			PORTB |= (1<<TRIGGER_R);
@@ -163,6 +188,8 @@ void autonoom()
 			{
 				centreer();
 				achteruit(0, 1);
+				achteruit(0,1);
+				achteruit(0,1);
 			}
 		}
 	}
@@ -292,7 +319,7 @@ ISR(PCINT1_vect)
 		//timerwaarde1 = TCNT0 / 1856;		//1 timer waarde om de 32 us. dus delen door 32 om 1 us te hebben, dan delen door 58 om naar cm te gaan
 		timerwaarde0 = TCNT0 ;
 		afstand_R = timerwaarde0;
-		if(timerwaarde0 <= 20)
+		if(timerwaarde0 <= 30)
 		{
 			stop_R = 1;
 		}
@@ -317,7 +344,7 @@ ISR(PCINT2_vect)
 		status2 = 1;
 		timerwaarde2 = TCNT2;
 		afstand_L = timerwaarde2;
-		if(timerwaarde2 <= 20)
+		if(timerwaarde2 <= 30)
 		{
 			stop_L = 1;
 		}
@@ -373,7 +400,7 @@ void timer2Stop()
 void vooruit(uint8_t modus)
 {
 	PORTB |=(1<<UITGANGV);					//gas geven
-	if(modus == 1) _delay_ms(10);							//niet te snel rijden (auto niet kapot rijden tijdens tests!)
+	if(modus == 1) _delay_ms(50);							//niet te snel rijden (auto niet kapot rijden tijdens tests!)
 	else _delay_ms(20);
 	PORTB &=~(1<<UITGANGV);
 	
@@ -383,7 +410,7 @@ void achteruit(uint8_t remmen, uint8_t modus)		//remmen, modus
 	if (remmen == 1)
 	{
 		PORTB |=(1<<UITGANGA);					//achteruit rijden
-		if(modus == 1) _delay_ms(100);
+		if(modus == 1) _delay_ms(300);
 		else _delay_ms(250);
 		PORTB &=~(1<<UITGANGA);
 	}
