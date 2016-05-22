@@ -115,7 +115,7 @@ void autonoom()
 		PORTD |= (1<<TRIGGER_F);
 		_delay_us(10);
 		PORTD &= ~(1<<TRIGGER_F);
-		_delay_ms(30);
+		_delay_ms(60);
 		//eind trigger signaal
 		
 		if(stop_F == 0)
@@ -148,63 +148,21 @@ void autonoom()
 			PORTB &= ~(1<<TRIGGER_R);
 			//eind trigger RIGHT signaal
 			
-			_delay_ms(30);							//wachten op echo signalen
-			
-			if(richting == 0)
+			_delay_ms(60);							//wachten op echo signalen
+			if((afstand_R >= afstand_L) && (stop_R == 0))
 			{
-				if((afstand_R >= afstand_L) && (stop_R == 0))
-				{
-					//rechts rijden
-					richting = 2;
-				}
-				else if(stop_L == 0)
-				{
-					//links rijden
-					richting = 1;
-				}
-				else
-				{
-					//achteruit rijden
-					richting = 3;
-				}
+				rechts();
+				vooruit(1);
+			}
+			else if(stop_L == 0)
+			{
+				links();
+				vooruit(1);
 			}
 			else
 			{
-				if(richting == 1)		//links
-				{
-					links();
-					for(int i=0;i<10;i++)
-					{
-						vooruit(1);
-					}
-					
-				}
-				else if(richting == 2)		//rechts
-				{
-					rechts();
-					for(int i=0;i<20;i++)
-					{
-						vooruit(1);
-					}
-					_delay_ms(50);
-					links();
-					_delay_ms(50);
-					rechts();
-					for(int i=0;i<10;i++)
-					{
-						vooruit(1);
-					}
-					
-				}
-				else if(richting == 3)		//achteruit
-				{
-					centreer();
-					for(int i = 0; i < 10; i++)
-					{
-						achteruit(0, 1);	//achteruit 1ste functie
-					}
-				}
-				richting = 0;
+				centreer();
+				achteruit(0, 1);
 			}
 		}
 	}
