@@ -31,6 +31,7 @@ volatile uint8_t	stoppen = 0;
 volatile uint8_t	stopdebounce = 0;
 //		Functie declaraties		//
 void autonoom();
+void autonoom_vorig();
 void manueel();
 void timer1Start();
 void timer1Stop();
@@ -103,9 +104,89 @@ int main(void)
 	}
 }
 
-// ###################### AUTONOME FUNCTIE ######################
 
 void autonoom()
+{
+	uint_8t stoppen_auto = 0;
+	uint_8t debounce = 0;
+	while(PIND & (1<<MODE_SEL1))
+	{
+		PORTD &=~(1<<TRIGGER_F);
+		PORTD |=(1<<TRIGGER_F); 
+		_delay_us(10);
+		PORTD &=~(1<<TRIGGER_F);
+		_delay_ms(30);
+
+		if(stop_F==1)
+		{
+			debounce++;
+			if(debounce>2)
+			{
+				debounce=0;
+				//trigger signaal LEFT-RIGHT sturen
+				PORTD &= ~(1<<TRIGGER_L);
+				PORTB &= ~(1<<TRIGGER_R);
+				PORTD |= (1<<TRIGGER_L);
+				PORTB |= (1<<TRIGGER_R);
+				_delay_us(10);
+				PORTD &= ~(1<<TRIGGER_L);
+				PORTB &= ~(1<<TRIGGER_R);
+				_delay_ms(30);
+				if(stoppen_auto==0)
+				{
+					achteruit(1,2);
+				}
+				else
+				{
+					if(richting==0)
+					{
+						if((afstand_R>afstand_L)&&stop_R==0)
+						{
+							rechts()
+							for(int i=0;i<10;i++)
+							{
+								vooruit(1);
+							}
+							
+						}
+						else if((afstand_L>afstand_R)&&stop_L==0)
+						{
+							links()
+							for(int i=0;i<10;i++)
+							{
+								vooruit(1);
+							}
+						}
+						else
+						{
+							centreer()
+							for(int i=0;i<10;i++)
+							{
+								achteruit(2,1);
+							}
+						}
+					}
+				}
+				
+			}
+		}
+		else
+		{
+			richting = 0;
+			stoppen_auto=0;
+			centreer();
+			vooruit(1);
+			debounce = 0;
+		}
+
+	}
+}
+
+
+
+// ###################### AUTONOME FUNCTIE ######################
+
+void autonoom_vorig()
 {
 	volatile uint8_t stoppen_auto = 0;
 	while(PIND & (1<<MODE_SEL1))
