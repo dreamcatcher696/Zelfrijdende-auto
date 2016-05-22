@@ -130,6 +130,7 @@ void autonoom()
 		{
 			if(stoppen_auto == 0)
 			{
+				
 				achteruit(1, 1);					//remmen, functie 1
 				stoppen_auto = 1;
 			}
@@ -172,14 +173,22 @@ void autonoom()
 				if(richting == 1)		//links
 				{
 					links();
-					vooruit(1);
+					for(int i=0;i<10;i++)
+					{
+						vooruit(1);
+					}
+					
 				}
-				if(richting == 2)		//rechts
+				else if(richting == 2)		//rechts
 				{
 					rechts();
-					vooruit(1);
+					for(int i=0;i<10;i++)
+					{
+						vooruit(1);
+					}
+					
 				}
-				if(richting == 3)		//achteruit
+				else if(richting == 3)		//achteruit
 				{
 					centreer();
 					for(int i = 0; i < 10; i++)
@@ -191,12 +200,6 @@ void autonoom()
 			}
 		}
 	}
-	afstand_L = 0;
-	afstand_R = 0;
-	stop_F = 0;
-	stop_L = 0;
-	stop_R = 0;
-	richting = 0;
 }
 
 // ###################### MANUELE FUNCTIE ######################
@@ -423,7 +426,7 @@ void achteruit(uint8_t remmen, uint8_t modus)		//remmen, modus
 		PORTB |=(1<<UITGANGA);
 		if(modus == 1) _delay_ms(10);			//achteruit rijden
 		else _delay_ms(20);
-		PORTB &=~(1<<UITGANGA);	
+		PORTB &=~(1<<UITGANGA);
 	}
 }
 void links()
