@@ -24,9 +24,9 @@
 volatile uint8_t	stop_F = 0;			//als stop == 0 dan geen object gedetecteerd
 volatile uint8_t	stop_L = 0;
 volatile uint8_t	stop_R = 0;
+volatile uint8_t	afstand_F = 0;
 volatile uint8_t	afstand_L = 0;
 volatile uint8_t	afstand_R = 0;
-volatile uint8_t	richting = 0;		//0 - vooruit	1 - links	2 - rechts	3 - achteruit
 volatile uint8_t	stoppen = 0;
 volatile uint8_t	stopdebounce = 0;
 //		Functie declaraties		//
@@ -73,7 +73,7 @@ int main(void)
 	EICRA |= (1<<ISC01)| (1<<ISC00);   //rising edge interrupt controle (ISC00 op 0 en isc 01 op 1 voor falling)
 	EIMSK |= (1<<INT0);					//enablen van external interrupt 0
 	
-	//PCICR voor enabken van pin change interrupt[23-16] enz.
+	//PCICR voor enablen van pin change interrupt[23-16] enz.
 	//PCMSK voor enablen van apparte interrupts?
 	//PCIFR bevat de interrupt flags
 	
@@ -117,52 +117,60 @@ void autonoom()
 		PORTD &= ~(1<<TRIGGER_F);
 		_delay_ms(60);
 		//eind trigger signaal
+		//trigger signaal LEFT sturen
+		PORTD &= ~(1<<TRIGGER_L);
+		PORTD |= (1<<TRIGGER_L);
+		_delay_us(10);
+		PORTD &= ~(1<<TRIGGER_L);
+		//eind trigger signaal LEFT
+		_delay_ms(60);
+		//trigger signaal RIGHT sturen
+		PORTB &= ~(1<<TRIGGER_R);
+		PORTB |= (1<<TRIGGER_R);
+		_delay_us(10);
+		PORTB &= ~(1<<TRIGGER_R);
+		_delay_ms(60);
+		//eind trigger RIGHT signaal
 		
 		if(stop_F == 0)
 		{
 			//vooruit rijden
-			richting = 0;
 			stoppen_auto = 0;
-			centreer();
 			vooruit(1);
-		}
-		else
-		{
-			if(stoppen_auto == 0)
+			if(afstand_F <= 60)
 			{
-				
-				achteruit(1, 1);					//remmen, functie 1
-				stoppen_auto = 1;
-			}
-			//trigger signaal LEFT sturen
-			PORTD &= ~(1<<TRIGGER_L);
-			PORTD |= (1<<TRIGGER_L);
-			_delay_us(10);
-			PORTD &= ~(1<<TRIGGER_L);
-			//eind trigger signaal LEFT
-			
-			//trigger signaal RIGHT sturen
-			PORTB &= ~(1<<TRIGGER_R);
-			PORTB |= (1<<TRIGGER_R);
-			_delay_us(10);
-			PORTB &= ~(1<<TRIGGER_R);
-			//eind trigger RIGHT signaal
-			
-			_delay_ms(60);							//wachten op echo signalen
-			if((afstand_R >= afstand_L) && (stop_R == 0))
-			{
-				rechts();
-				vooruit(1);
-			}
-			else if(stop_L == 0)
-			{
-				links();
-				vooruit(1);
+				if(afstand_R >= 15)
+				{
+					rechts();
+				}
+				else
+				{
+					links();
+				}
 			}
 			else
 			{
 				centreer();
-				achteruit(0, 1);
+			}
+		}
+		else
+		{
+			while(afstand_F <= 70)
+			{
+					//trigger signaal sturen
+					PORTD &= ~(1<<TRIGGER_F);
+					PORTD |= (1<<TRIGGER_F);
+					_delay_us(10);
+					PORTD &= ~(1<<TRIGGER_F);
+					_delay_ms(60);
+					//eind trigger signaal
+
+						
+
+					//rechts();
+					centreer();
+					achteruit(0, 1);
+				
 			}
 		}
 	}
@@ -266,7 +274,8 @@ ISR(INT0_vect)
 		timer1Stop();
 		status1 = 1;
 		timerwaarde1 = TCNT1 / 58;
-		if(timerwaarde1 <= 100)
+		afstand_F = timerwaarde1;
+		if(timerwaarde1 <= 40)
 		{
 			stop_F = 1;
 		}
@@ -292,7 +301,7 @@ ISR(PCINT1_vect)
 		//timerwaarde1 = TCNT0 / 1856;		//1 timer waarde om de 32 us. dus delen door 32 om 1 us te hebben, dan delen door 58 om naar cm te gaan
 		timerwaarde0 = TCNT0 ;
 		afstand_R = timerwaarde0;
-		if(timerwaarde0 <= 20)
+		if(timerwaarde0 <= 30)
 		{
 			stop_R = 1;
 		}
@@ -317,7 +326,7 @@ ISR(PCINT2_vect)
 		status2 = 1;
 		timerwaarde2 = TCNT2;
 		afstand_L = timerwaarde2;
-		if(timerwaarde2 <= 20)
+		if(timerwaarde2 <= 30)
 		{
 			stop_L = 1;
 		}
@@ -373,8 +382,8 @@ void timer2Stop()
 void vooruit(uint8_t modus)
 {
 	PORTB |=(1<<UITGANGV);					//gas geven
-	if(modus == 1) _delay_ms(10);							//niet te snel rijden (auto niet kapot rijden tijdens tests!)
-	else _delay_ms(20);
+	if(modus == 1) _delay_ms(50);							//niet te snel rijden (auto niet kapot rijden tijdens tests!)
+	else _delay_ms(40);
 	PORTB &=~(1<<UITGANGV);
 	
 }
@@ -383,14 +392,14 @@ void achteruit(uint8_t remmen, uint8_t modus)		//remmen, modus
 	if (remmen == 1)
 	{
 		PORTB |=(1<<UITGANGA);					//achteruit rijden
-		if(modus == 1) _delay_ms(100);
+		if(modus == 1) _delay_ms(300);
 		else _delay_ms(250);
 		PORTB &=~(1<<UITGANGA);
 	}
 	else
 	{
 		PORTB |=(1<<UITGANGA);
-		if(modus == 1) _delay_ms(10);			//achteruit rijden
+		if(modus == 1) _delay_ms(50);			//achteruit rijden
 		else _delay_ms(20);
 		PORTB &=~(1<<UITGANGA);
 	}
